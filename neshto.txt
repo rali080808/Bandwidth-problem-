@@ -1,0 +1,28 @@
+nums = []
+for i in range(0, n+1):
+      nums.append(-1)
+
+newnum = 1
+q = [s]
+visited = []
+for i in range(10000):
+      visited.append(0)
+
+visited[s] = True
+while(len(q)!=0):
+     curr = q[0]
+     nums[curr] = newnum
+     newnum = newnum + 1
+     del(q[0])
+     next_edges = [(len(edges[next]), next) for next in edges[curr]]
+     next_edges.sort()
+     for _, next in next_edges:
+          if visited[next]==False: 
+               q.append(next)
+               visited[next] = True
+
+
+
+
+if r >= len(minDegreeNodes):
+                  break
