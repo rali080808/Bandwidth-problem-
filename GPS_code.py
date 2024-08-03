@@ -99,9 +99,7 @@ alp = [-1,-1] * (n+1) #associated level pairs
 for i in range(1, n+1):
     alp[i] = [ levelV[i], maxiLevelV - levelU[i] + 1 ]
 
-levelN = []
-for i in range(0, n+1):
-    levelN.append([])
+levelN = [] * (n+1)
 
 # step 1 - all verteces whose associated level pair is in the form (i,i) get removed from the graph
 used = (n+1) * [False]
@@ -158,19 +156,51 @@ for i in range(n+1):
 for w in range(1, n+1):
     if alp[w][0] != alp[w][1]:
         if h0 < l0:
-            levelN[ alp[w][0] ].append(w)
+            levelN[ alp[w][0] ].append(w) 
         elif l0 < h0:
-            levelN[ alp[w][1] ].append(w) #?? maxiLevelV - j + 1
+            levelN[ alp[w][1] ].append(w) #?? maxiLevelV - j + 1 
         else:
             if widthV < widthU:
-                levelN[ alp[w][0] ].append(w)
+                levelN[ alp[w][0] ].append(w) 
             else:
-                levelN[ alp[w][1] ].append(w) #?? maxiLevelV - j + 1
+                levelN[ alp[w][1] ].append(w) #?? maxiLevelV - j + 1 
 
 #ALGORITHM III -Numbering
 
 #A
+def swap(u,v):
+    return v, u
+
+if len(edges[u]) < len(edges[v]):
+    u,v = swap(u,v)
+    for i in range(1, n/2):
+        levelN[i], levelN[maxiLevelV-i+1] = swap(levelN[i], levelN[maxiLevelV-i+1])
+
+#B                
+newI = (n+1) * [0]
+oldI = (n+1) * [0]
+num = 1
+
+newI[v] = num
+oldI[num] = v
+num += 1
+for k in range(1, maxiLevelV):
+    for ni in range(1,n):
+        if oldI[ni] == 0:
+            continue #maybe break
+        if oldI[ni] not in levelN[k]:
+            continue
+        next_edges = [(len(edges[i]), i) for i in edges[oldI[ni]]]
+        for _, next in next_edges:
+            newI[next] = num
+            oldI[num] = next
+            num += 1
+    degree = oo
+    
+    for w in levelN[k]:
+        if oldI[w] == 0:
+            if 
+   
 
 
-#B
 
