@@ -152,31 +152,37 @@ for i in range(n+1):
         if h[i] > h0:
             h0 = h[i]
 
+first_or_second = -1
 
 for w in range(1, n+1):
     if alp[w][0] != alp[w][1]:
         if h0 < l0:
             levelN[ alp[w][0] ].append(w) 
+            first_or_second = 1
         elif l0 < h0:
             levelN[ alp[w][1] ].append(w) #?? maxiLevelV - j + 1 
+            first_or_second = 2
         else:
             if widthV < widthU:
                 levelN[ alp[w][0] ].append(w) 
+                first_or_second = 1
             else:
                 levelN[ alp[w][1] ].append(w) #?? maxiLevelV - j + 1 
+                first_or_second = 2
 
 #ALGORITHM III -Numbering
 
-#A
+#A - interchange u and v if needed
 def swap(u,v):
     return v, u
-
+interchangedUV = False
 if len(edges[u]) < len(edges[v]):
+    interchangedUV = True
     u,v = swap(u,v)
     for i in range(1, n/2):
         levelN[i], levelN[maxiLevelV-i+1] = swap(levelN[i], levelN[maxiLevelV-i+1])
 
-#B                
+#B - numbering       
 newI = (n+1) * [0]
 oldI = (n+1) * [0]
 num = 1
@@ -184,23 +190,46 @@ num = 1
 newI[v] = num
 oldI[num] = v
 num += 1
+
 for k in range(1, maxiLevelV):
+    #B2
     for ni in range(1,n):
         if oldI[ni] == 0:
-            continue #maybe break
+            break
         if oldI[ni] not in levelN[k]:
             continue
         next_edges = [(len(edges[i]), i) for i in edges[oldI[ni]]]
-        for _, next in next_edges:
-            newI[next] = num
-            oldI[num] = next
-            num += 1
-    degree = oo
-    
+        for _,next in next_edges:
+            if newI[next] == 0:
+                newI[next] = num
+                oldI[num] = next
+                num += 1
+    #B3
+    degreeUnnumbered = oo
+    unnumbered = -1
     for w in levelN[k]:
-        if oldI[w] == 0:
-            if 
-   
+        if newI[w] == 0:
+            if len(edges[w]) < degreeUnnumbered:
+                degreeUnnumbered = len(edges[w])
+                unnumbered = w
+    if unnumbered != -1:
+        k = k-1
+        continue
+    #C
+    for ni in range(1,n):
+        if oldI[ni] == 0:
+            break
+        if oldI[ni] in levelN[k]:
+            next_edges = [(len(edges[i]), i) for i in edges[oldI[ni]]]
+            for _,next in next_edges:
+                if next in levelN[k+1]:
+                    newI[next] = num
+                    oldI[num] = next
+                    num += 1
 
-
+#D 
+if (interchangedUV == True and first_or_second == 2) or (interchangedUV == False and first_or_second == 1):
+    for i in range(1, n):
+        if newI[i] <= n/2:
+            newI[i], newI[ oldI[ n - newI[i] + 1 ] ] = swap(newI[i], newI[ oldI[ n - newI[i] + 1 ] ])
 
