@@ -27,8 +27,8 @@ def bfsLevel(start):
     level = []
     for i in range(0, n+1):
         level.append(-1)
-    q = [v]
-    level[v] = 1
+    q = [start]
+    level[start] = 1
     maxiLevel = -1
     while len(q) != 0:
         curr = q[0]
