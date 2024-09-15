@@ -48,7 +48,8 @@ def findWidth(level):
         width.append(0)
     
     for l in level:
-        width[l] = width[l] + 1
+        if ( l != -1 ):
+            width[l] = width[l] + 1
 
     maximalWidth = 0
     for w in width:
@@ -95,46 +96,49 @@ widthV = findWidth(levelV)
 
 #ALGORITHM II - minimizing level width
 
-alp = [-1,-1] * (n+1) #associated level pairs
+alp = [[-1, -1] for _ in range(n+1)] #associated level pairs
 for i in range(1, n+1):
     alp[i] = [ levelV[i], maxiLevelV - levelU[i] + 1 ]
 
-levelN = [] * (n+1)
-
+levelN = [ [] for _ in range(0,n+1) ]
+print("n=", n)
 # step 1 - all verteces whose associated level pair is in the form (i,i) get removed from the graph
 used = (n+1) * [False]
 for w in range(1, n+1):
     if alp[w][0] == alp[w][1]:
+        print("alp[w][0] =",alp[w][0] )
+        print("w=", w)
         levelN[ alp[w][0] ].append(w)
         used[w] = True
-
+print("end of ALG II step 1")
 #step 2 - Find the components and arrange them in descending order based on the number of vertices in each component
-c = (n+1) * []
+c = [ [] for _ in range(0,n+1) ]
 def dfs(start, component):
     used[start] = True
     c[component].append(start)
     for next in edges[start]:
         if used[next] == False:
-            dfs(next)
+            dfs(next, component)
+
 component = 0
 for i in range(1, n+1):
-    if not used[i]:
+    if used[i]==0:
         component += 1
         dfs(i, component)
 
-next_component = [ (len(c[next]), c[next]) for next in range(0, n+1) ]
+next_component = [ (len(c[next]), c[next]) for next in range(0, component+1) ]
 next_component.sort()
 
 #step 3 - for each component do these a, b and c something
 
 #sm A - n[i] is the width of levelN[i] for now(only w nodes)
-n = (n+1) * [0]
+szLN = (n+1) * [0]   # szLN[i] = size of levelN[i]
 for i in range(0, n+1):
-    n[i] = len(levelN[i])
+    szLN[i] = len(levelN[i])
 
 #sm B - compute the vectors h and l
-h = [n[i] for i in range(n+1)]
-l = [n[i] for i in range(n+1)]
+h = [szLN[i] for i in range(n+1)]
+l = [szLN[i] for i in range(n+1)]
 
 for i, j in alp:
     h[i] += 1
@@ -144,92 +148,127 @@ for i, j in alp:
 l0 = 0
 h0 = 0
 for i in range(n+1):
-    if l[i] - n[i] > 0:
+    if l[i] - szLN[i] > 0:
         if l[i] > l0:
             l0 = l[i]
     
-    if h[i] - n[i] > 0:
+    if h[i] - szLN[i] > 0:
         if h[i] > h0:
             h0 = h[i]
 
 first_or_second = -1
 
-for w in range(1, n+1):
-    if alp[w][0] != alp[w][1]:
-        if h0 < l0:
-            levelN[ alp[w][0] ].append(w) 
-            first_or_second = 1
-        elif l0 < h0:
-            levelN[ alp[w][1] ].append(w) #?? maxiLevelV - j + 1 
-            first_or_second = 2
-        else:
-            if widthV < widthU:
+for com in range(1, component+1):
+    for w in next_component[com][1]:
+        if alp[w][0] != alp[w][1]:
+            if h0 < l0:
                 levelN[ alp[w][0] ].append(w) 
                 first_or_second = 1
-            else:
+            elif l0 < h0:
                 levelN[ alp[w][1] ].append(w) #?? maxiLevelV - j + 1 
                 first_or_second = 2
+            else:
+                if widthV < widthU:
+                    levelN[ alp[w][0] ].append(w) 
+                    first_or_second = 1
+                else:
+                    levelN[ alp[w][1] ].append(w) #?? maxiLevelV - j + 1 
+                    first_or_second = 2
 
+for k in range(1, maxiLevelV+1):
+    print(k, ":")
+    print(levelN[k])
 #ALGORITHM III -Numbering
 
 #A - interchange u and v if needed
 def swap(u,v):
     return v, u
+
 interchangedUV = False
 if len(edges[u]) < len(edges[v]):
     interchangedUV = True
     u,v = swap(u,v)
-    for i in range(1, n/2):
+    for i in range(1, n/2+1):
         levelN[i], levelN[maxiLevelV-i+1] = swap(levelN[i], levelN[maxiLevelV-i+1])
 
 #B - numbering       
-newI = (n+1) * [0]
-oldI = (n+1) * [0]
-num = 1
+newI = [0] * (n+1)
+oldI = [0] * (n+1)
 
+num = 1
 newI[v] = num
 oldI[num] = v
 num += 1
-
-for k in range(1, maxiLevelV):
+bandwidth = 0
+k = 0
+import time # not needed
+while (k <= maxiLevelV): # [1, maxiLevelV]
     #B2
-    for ni in range(1,n):
+    k += 1
+    time.sleep(0.5)
+    print("k=", k)
+    for ni in range(1,n+1): # [1,n]
         if oldI[ni] == 0:
             break
         if oldI[ni] not in levelN[k]:
             continue
         next_edges = [(len(edges[i]), i) for i in edges[oldI[ni]]]
+        next_edges.sort()
         for _,next in next_edges:
+            if ( num > n ):
+                break
             if newI[next] == 0:
+                print("num1=", num)
+                print("next1=", next)
                 newI[next] = num
                 oldI[num] = next
+                if ( bandwidth < num - ni ):
+                    bandwidth = num - ni
                 num += 1
     #B3
     degreeUnnumbered = oo
     unnumbered = -1
+    
     for w in levelN[k]:
         if newI[w] == 0:
             if len(edges[w]) < degreeUnnumbered:
                 degreeUnnumbered = len(edges[w])
                 unnumbered = w
+                print("unnumbered=", w)
     if unnumbered != -1:
         k = k-1
         continue
     #C
-    for ni in range(1,n):
+    for ni in range(1,n+1):
+        if ( num > n ):
+            break
         if oldI[ni] == 0:
             break
         if oldI[ni] in levelN[k]:
             next_edges = [(len(edges[i]), i) for i in edges[oldI[ni]]]
+            next_edges.sort()
             for _,next in next_edges:
+                if ( num > n ):
+                    break 
                 if next in levelN[k+1]:
+                    if ( newI[next] != 0 ):
+                        continue
+                    print("num2=", num)
+                    print("next2=", next)
                     newI[next] = num
                     oldI[num] = next
+                    if ( bandwidth < num - ni ):
+                        bandwidth = num - ni
                     num += 1
-
+    
+print("bandwidth before step D=", bandwidth);                 
+print(newI)
 #D 
 if (interchangedUV == True and first_or_second == 2) or (interchangedUV == False and first_or_second == 1):
-    for i in range(1, n):
+    for i in range(1, n+1):
         if newI[i] <= n/2:
             newI[i], newI[ oldI[ n - newI[i] + 1 ] ] = swap(newI[i], newI[ oldI[ n - newI[i] + 1 ] ])
+    print(newI)
+
+#printing results
 

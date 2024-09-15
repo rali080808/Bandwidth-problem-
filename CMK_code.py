@@ -28,14 +28,14 @@ for j in range(m):
 
 
 p = 100000000
-minDegreeNodes = []
-for i in range(1,n+1):
-      if ( len(edges[i]) < p ):
-            p = len(edges[i])
-            minDegreeNodes = [i]
-      elif len(edges[i]) == p:
-            minDegreeNodes.append(i)
-
+minDeg = m
+for i in range(1, n+1):
+      if ( len(edges[i]) < minDeg ):
+            minDeg = len(edges[i])
+            print(minDeg)
+minDegreeNodes = [ node for node in range(1, n+1) if len(edges[node]) == minDeg ]
+ 
+print("minDegreeNodes=", minDegreeNodes)
 nums = []
 for i in range(0, n+1):
       nums.append(-1)
@@ -50,6 +50,7 @@ for r in range(k):
       if len(minDegreeNodes) <= k:
             s = minDegreeNodes[r]
       else:
+            print("random")
             s = random.choice(minDegreeNodes)
       
       currnums = []
@@ -59,15 +60,13 @@ for r in range(k):
       newnum = 2
       q = [s]
       currnums[s] = 1
-      visited = []
-      for i in range(MAXN):
-            visited.append(0)
+      visited = [False] * (n+1)
             
       visited[s] = True
       bandwidth = -1
-      while(len(q)!=0):
-            curr = q[0]
-            curr = q[0]
+      while(q):
+            curr = q[0] 
+            print("curr=", curr)
             del(q[0])
             next_edges = [(len(edges[next]), next) for next in edges[curr]]
             next_edges.sort()
@@ -76,13 +75,15 @@ for r in range(k):
                         q.append(next)
                         visited[next] = True
                         currnums[next] = newnum
-                        if bandwidth < newnum - currnums[curr]:
-                              bandwidth = newnum - currnums[curr]
                         newnum = newnum + 1
-      #print('currBandwidth=',bandwidth)
+                        if bandwidth < currnums[next] - currnums[curr]:
+                              bandwidth = currnums[next] - currnums[curr]
+                              print("if bandwidth", bandwidth)
+                        
+      print('currBandwidth=',bandwidth)
       if bandwidth <= smallestBandwidth:
             smallestBandwidth = bandwidth
-            #print("hibandwidth=",smallestBandwidth)
+            print("hibandwidth=",smallestBandwidth)
             nums = currnums
  
 
