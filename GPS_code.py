@@ -205,7 +205,7 @@ import time # not needed
 while (k <= maxiLevelV): # [1, maxiLevelV]
     #B2
     k += 1
-    time.sleep(0.5)
+    time.sleep(0.5) # not needed
     print("k=", k)
     for ni in range(1,n+1): # [1,n]
         if oldI[ni] == 0:
@@ -236,6 +236,10 @@ while (k <= maxiLevelV): # [1, maxiLevelV]
                 unnumbered = w
                 print("unnumbered=", w)
     if unnumbered != -1:
+        print(num)
+        newI[unnumbered] = num
+        oldI[num] = unnumbered
+        num += 1
         k = k-1
         continue
     #C
