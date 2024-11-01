@@ -3,9 +3,8 @@ oo = 10000000
 n = int(input())
 m = int(input())
 
-edges = []
-for i in range(0, n+1):
-    edges.append([])
+edges = [[] for _ in range(0, n+1)]
+ 
 
 
 for j in range(m):
@@ -18,7 +17,7 @@ newI = [0] * (n+1)
 oldI = [0] * (n+1)
 bandwidth = 0
 num = 1
-while True:
+while True: # big
     
     flag = True
     for w in range(1, n+1):
@@ -42,9 +41,7 @@ while True:
 
     maxiLevel = -1
     def bfsLevel(start):
-        level = []
-        for i in range(0, n+1):
-            level.append(-1)
+        level = [ (-1) for _ in range(0, n+1)]
         q = [start]
         level[start] = 1
         maxiLevel = -1
@@ -61,9 +58,8 @@ while True:
         return level,maxiLevel
 
     def findWidth(level):
-        width = []
-        for i in range(1, n+1):
-            width.append(0)
+        width = [ (0) for _ in range(0, n+1)]
+         
         
         for l in level:
             if ( l != -1 ):
@@ -77,22 +73,22 @@ while True:
         return maximalWidth
 
     verticesInThisComponent = []
-    levelV,maxiLevel = bfsLevel(v)
+    levelStructureV,maxiLevel = bfsLevel(v)
   
     for w in range(1, n+1):
-        if levelV[w] != -1:
+        if levelStructureV[w] != -1:
             verticesInThisComponent.append(w)
     print("vertices in this component = ", verticesInThisComponent)         
 
     maxiLevelV = maxiLevel
     u = -1
     flag = 1
-    levelU = []
+    levelStructureU = []
     while flag == True:
         s = []
         for i in range(1, n+1):
             if i in verticesInThisComponent:
-                if levelV[i] == maxiLevelV:
+                if levelStructureV[i] == maxiLevelV:
                     s.append(i)
         
                 
@@ -101,33 +97,31 @@ while True:
         next_s.sort()
         minimalWidthS = oo 
         for _,next in next_s:
-            levelS,maxiLevel = bfsLevel(next)
+            levelStructureS,maxiLevel = bfsLevel(next)
             if maxiLevel > maxiLevelV:
                 maxiLevelV = maxiLevel
                 v = next
-                levelV = levelS
+                levelStructureV = levelStructureS.copy()
                 flag = True
                 break
-            widthThisS = findWidth(levelS)
+            widthThisS = findWidth(levelStructureS)
             if widthThisS < minimalWidthS:
                 minimalWidthS = widthThisS
+                widthU = minimalWidthS
                 u = next
-                levelU = levelS
+
     print('maxiLevelV=', maxiLevelV)
-    print("u=",u)
     print("v=",v)
-    widthU = minimalWidthS
-    widthV = findWidth(levelV)
+    print("u=",u)
+    widthU = minimalWidthS # izlishno, zashtoto go slozhih na line 112
+    widthV = findWidth(levelStructureV)
     #The algorithm terminates with u and v the endpoints of the diameter
-    verticesInLevelU = levelU
-    levelU = [[-1] for _ in range(1, n+1)]
-    levelU = [[maxiLevelV] for w in range(1, n+1) if w in verticesInLevelU]
-    levelU, nqkakuvMaxiLevel = bfsLevel(u)
+    levelStructureU, nqkakuvMaxiLevel = bfsLevel(u)
     #ALGORITHM II - minimizing level width
   
     alp = [[-1, -1] for _ in range(n+1)] #associated level pairs
     for i in verticesInThisComponent:
-        alp[i] = [ levelV[i], maxiLevelV - levelU[i] + 1 ]
+        alp[i] = [ levelStructureV[i], maxiLevelV - levelStructureU[i] + 1 ]
 
     levelN = [ [] for _ in range(0,n+1) ]
     print("n=", n)
@@ -152,7 +146,7 @@ while True:
 
     component = 0
     for i in range(1, n+1):
-        if used[i]==0 and (i in verticesInThisComponent):
+        if used[i] == 0 and (i in verticesInThisComponent):
             component += 1
             dfs(i, component)
 
@@ -161,7 +155,7 @@ while True:
 
     #step 3 - for each component do these a, b and c something
 
-    #sm A - n[i] is the width of levelN[i] for now(only w nodes)
+    #sm A - szLN[i] is the width of levelN[i] for now(only w nodes)
     szLN = (n+1) * [0]   # szLN[i] = size of levelN[i]
     for i in range(0, n+1):
         szLN[i] = len(levelN[i])
@@ -170,7 +164,9 @@ while True:
     h = [szLN[i] for i in range(n+1)]
     l = [szLN[i] for i in range(n+1)]
 
-    for i, j in alp:
+    for w in verticesInThisComponent:
+        i = alp[w][0]
+        j = alp[w][1]
         h[i] += 1
         l[j] += 1 #?? maxiLevelV - j + 1
 
@@ -186,11 +182,10 @@ while True:
             if h[i] > h0:
                 h0 = h[i]
 
-    first_or_second = -1
-
+    first_or_second = -1 # sometimes in the end we have -1 for an answer/ it stays this way bc all the vertices have alp (i,i)
     for com in range(1, component+1):
         for w in next_component[com][1]:
-            if alp[w][0] != alp[w][1]:
+            if alp[w][0] != alp[w][1]: # when this if is false -> first_or_second = -1
                 if h0 < l0:
                     levelN[ alp[w][0] ].append(w) 
                     first_or_second = 1
@@ -219,8 +214,10 @@ while True:
     if len(edges[u]) < len(edges[v]):
         interchangedUV = True
         u,v = swap(u,v)
-        for i in range(1, n/2+1): # ???
-            levelN[i], levelN[maxiLevelV-i+1] = swap(levelN[i], levelN[maxiLevelV-i+1])
+
+        for i in range(1, n+1):  
+            if i in verticesInThisComponent:
+                levelN[i] = maxiLevelV - levelN[i] + 1
 
     #B - numbering       
 
@@ -268,12 +265,15 @@ while True:
             num += 1
             k = k-1
             continue
+
         #C
+        print("step C---------------------")
         for ni in range(1,n+1):
             if ( num > n ):
                 break
             if oldI[ni] == 0:
-                break
+                continue#break # continue i think
+            print("in the cycle")
             if oldI[ni] in levelN[k]:
                 next_edges = [(len(edges[i]), i) for i in edges[oldI[ni]]]
                 next_edges.sort()
@@ -283,7 +283,7 @@ while True:
                     if next in levelN[k+1]:
                         if ( newI[next] != 0 ):
                             continue
-                        print("num2=", num)
+                        print("num22222222222222222222222222222222222222222222222=", num)
                         print("next2=", next)
                         newI[next] = num
                         oldI[num] = next
@@ -294,11 +294,13 @@ while True:
     print("bandwidth before step D=", bandwidth);                 
     print(newI)
     #D 
+    print("interchangedUV=", interchangedUV)
+    print("first_or_second=", first_or_second)
     if (interchangedUV == True and first_or_second == 2) or (interchangedUV == False and first_or_second == 1):
+        print("step D in motion")
         for i in range(1, n+1):
             if i in verticesInThisComponent:
-                if newI[i] <= n/2:
-                    newI[i], newI[ oldI[ n - newI[i] + 1 ] ] = swap(newI[i], newI[ oldI[ n - newI[i] + 1 ] ])
+                newI[i] = n - i + 1
         print(newI)
 
 #printing results
